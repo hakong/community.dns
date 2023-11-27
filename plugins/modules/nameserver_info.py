@@ -65,6 +65,13 @@ options:
         elements: str
         required: false
         default: null
+    recursive_lookup:
+        description:
+            - Whether to do recursive lookups when resolving nameservers for subdomains that don't exist.
+            - When set to V(true), will return the nameservers of the closest existing parent zone.
+        type: bool
+        required: false
+        default: false
 requirements:
     - dnspython >= 1.15.0 (maybe older versions also work)
 '''
@@ -136,6 +143,7 @@ def main():
             always_ask_default_resolver=dict(type='bool', default=True),
             servfail_retries=dict(type='int', default=0),
             servers=dict(required=False, type='list', elements='str'),
+            recursive_lookup=dict(type='bool', default=False),
         ),
         supports_check_mode=True,
     )
@@ -143,9 +151,9 @@ def main():
 
     names = module.params['name']
     resolve_addresses = module.params['resolve_addresses']
-
     servers = module.params['servers']
-    
+    recursive_lookup = module.params['recursive_lookup']
+
     resolver = ResolveDirectlyFromNameServers(
         timeout=module.params['query_timeout'],
         timeout_retries=module.params['query_retry'],
@@ -161,7 +169,7 @@ def main():
 
     def f():
         for index, name in enumerate(names):
-            results[index]['nameservers'] = sorted(resolver.resolve_nameservers(name, resolve_addresses=resolve_addresses))
+            results[index]['nameservers'] = sorted(resolver.resolve_nameservers(name, resolve_addresses=resolve_addresses, recursive_lookup=recursive_lookup))
 
     guarded_run(f, module, generate_additional_results=lambda: dict(results=results))
     module.exit_json(results=results)
