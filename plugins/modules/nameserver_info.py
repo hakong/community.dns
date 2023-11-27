@@ -67,7 +67,7 @@ options:
         default: null
     recursive_lookup:
         description:
-            - Whether to do recursive lookups when resolving nameservers for hostnames that don't exist.
+            - Whether to do recursive lookups when resolving nameservers for subdomains that don't exist.
             - When set to V(true), will return the nameservers of the closest existing parent zone.
         type: bool
         required: false
