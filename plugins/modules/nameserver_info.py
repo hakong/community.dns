@@ -153,7 +153,7 @@ def main():
     resolve_addresses = module.params['resolve_addresses']
     servers = module.params['servers']
     recursive_lookup = module.params['recursive_lookup']
-    
+
     resolver = ResolveDirectlyFromNameServers(
         timeout=module.params['query_timeout'],
         timeout_retries=module.params['query_retry'],
