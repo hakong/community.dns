@@ -57,6 +57,14 @@ options:
             - How often to retry on SERVFAIL errors.
         type: int
         default: 0
+    servers:
+        description:
+            - A list of DNS server IP addresses to use for resolving nameserver information.
+            - When specified, these servers are used instead of the system's default DNS settings.
+        type: list
+        elements: str
+        required: false
+        default: null
 requirements:
     - dnspython >= 1.15.0 (maybe older versions also work)
 '''
@@ -127,6 +135,7 @@ def main():
             query_timeout=dict(type='float', default=10),
             always_ask_default_resolver=dict(type='bool', default=True),
             servfail_retries=dict(type='int', default=0),
+            servers=dict(required=False, type='list', elements='str'),
         ),
         supports_check_mode=True,
     )
@@ -135,11 +144,14 @@ def main():
     names = module.params['name']
     resolve_addresses = module.params['resolve_addresses']
 
+    servers = module.params['servers']
+    
     resolver = ResolveDirectlyFromNameServers(
         timeout=module.params['query_timeout'],
         timeout_retries=module.params['query_retry'],
         servfail_retries=module.params['servfail_retries'],
         always_ask_default_resolver=module.params['always_ask_default_resolver'],
+        server_addresses=servers,
     )
     results = [None] * len(names)
     for index, name in enumerate(names):
